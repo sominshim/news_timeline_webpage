@@ -303,11 +303,19 @@ def search_by_keyword(key=None, data=None):
 def datetime_to_string(dt_series):
     return [dt.strftime("%Y-%m-%d") for dt in dt_series.tolist()]
 
+from flask import Flask, render_template, request
+app = Flask(__name__)
+
+@app.route('/')
+def student():
+    return render_template('main.html', cate=cate, keyword=keyword)
+
 # Press the green button in the gut
 # ter to run the script.
 if __name__ == '__main__':
     # 카테고리 정보 : cat_num (0~7) - 숫자형
     # 검색어 정보 : keyword - 문자열
+
     cat_num = 2
     keyword = 'n번방'
 
