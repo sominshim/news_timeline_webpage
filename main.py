@@ -113,7 +113,6 @@ class Vectorizer:
         x_doc2vec = np.array(x_doc2vec)
         return x_doc2vec
 
-
 # 클러스터링 및 시각화
 class Get2DPlot:
     def help(self):
@@ -288,7 +287,6 @@ def tokenize(corpus, tokenizer, final_nouns_list):
     token = [doc for doc in noun_sent]
     return token
 
-
 def search_by_keyword(key=None, data=None):
     key = key
     match_cluster=[]
@@ -303,24 +301,7 @@ def search_by_keyword(key=None, data=None):
 def datetime_to_string(dt_series):
     return [dt.strftime("%Y-%m-%d") for dt in dt_series.tolist()]
 
-from flask import Flask, render_template, request
-app = Flask(__name__)
-
-@app.route('/')
-def student():
-    return render_template('main.html', cate=cate, keyword=keyword)
-
-# Press the green button in the gut
-# ter to run the script.
-if __name__ == '__main__':
-    # 카테고리 정보 : cat_num (0~7) - 숫자형
-    # 검색어 정보 : keyword - 문자열
-
-    cat_num = 2
-    keyword = 'n번방'
-
-    data_path = 'data/'
-
+def timeline(cat_num, keyword, data_path):
     catergories = ['law', 'education', 'accident', 'welfare', 'traffic', 'environment', 'region', 'health']
     cat_df = pd.read_csv(data_path + 'cat_data/{}.csv'.format(catergories[cat_num]))
 
@@ -331,6 +312,9 @@ if __name__ == '__main__':
     # 검색어 입력 시 키워드가 포함된 클러스터 번호 리턴
     match_cluster = search_by_keyword(keyword, cluster_info)
     keyword_df = cat_df[cat_df['labels'].isin(match_cluster)]
+
+    if keyword_df.empty:
+        return print("키워드에 해당하는 타임라인이 없습니다.")
 
     final_nouns_list = noun_extractor(cat_df)
 
@@ -423,5 +407,16 @@ if __name__ == '__main__':
     dt_article_list = np.array(date_body_timeline).flatten().tolist()
     dt_title_article_list = np.array(date_title_body_timeline).flatten().tolist()
 
-    print(timeline)
-    print(dt_title_article_list)
+    return dt_article_list
+    # return dt_title_article_list
+
+if __name__ == '__main__':
+    # 카테고리 정보 : cat_num (0~7) - 숫자형
+    # 검색어 정보 : keyword - 문자열
+
+    cat_num = 2
+    keyword = 'n번방'
+    data_path = 'data/'
+
+    timeline_list = timeline(cat_num, keyword, data_path)
+    print(timeline_list)
