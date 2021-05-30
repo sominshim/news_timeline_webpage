@@ -1,0 +1,24 @@
+<html>
+
+<body bgcolor="#d4a3ae">
+<br><br>
+    <center>
+        <br>
+        <h1>What's your personality type?</h1>
+        <form method="POST" action="{{url_for('predict')}}">
+
+            <b>
+                <h3>type your post!</h3>
+                <textarea name="content" cols="150" rows="30"></textarea>
+                <br>
+            </b>
+            <input type="submit" value='predict'>
+
+        </form>
+
+        <img src="static\image2.png" alt="flower">
+
+    </center>
+
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>자바스크립트 기초</title>
+        <style>
+            body { font-size: 3rem;}
+            h1 { background-color: #fff000;}
+            .menu {
+                display: flex;
+                border: 1px solid yellow;
+            }
+            .menu-link {
+                /*background-color: #4CAF50;*/
+                color: #82B298;
+                padding: 10px 10px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                border : none;
+
+                font-size: 12px;
+                margin: 4px 2px;
+                cursor: pointer;
+            }
+           /* 마우스 클릭 상태 */
+            .clicked_button{
+                background-color: #82B298;
+                color: whitesmoke;
+                /*position: relative;*/
+                /*top: 2px;*/
+            }
+            .menu {
+                background-color: yellowgreen;
+            }
+                /* 마우스 오버(마우스 올렸을때) */
+            button:hover{
+                background-color: #82B298;
+                color: whitesmoke;
+            }
+        </style>
+    </head>
+<body>
+    <h1 id="main-title">Event</h1>
+
+    <nav class="menu">
+        <button class="menu-link" data-menu="1">menu 1</button>
+        <button class="menu-link" data-menu="2">menu 2</button>
+        <button class="menu-link" data-menu="3">menu 3</button>
+    </nav>
+
+    <script>
+// 메뉴 클릭 때 색깔 바꾸기 - 첫번째 방법(약간 비효율적)
+var menuLinks = document.querySelectorAll('.menu-link');
+
+function clickMenuHandler() {   // onclickMenu와 같은 on____ , _____listener, _____handler들은 이벤트 리스너들이라고 할 수 있고, 보통 이런 이름들을 가짐
+     for (var i = 0; i < menuLinks.length; i++){
+         menuLinks[i].classList.remove('clicked_button');
+     }
+     this.classList.add('clicked_button');
+ }
+
+ for (var i = 0; i < menuLinks.length; i++){
+     menuLinks[i].addEventListener('click', clickMenuHandler);
+ }
+    </script>
+</body>
+</html>
