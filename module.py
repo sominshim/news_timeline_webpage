@@ -39,6 +39,14 @@ import time # 연산 시간 측정
 
 from collections import Counter
 from soynlp.noun import NewsNounExtractor
+# 문서 요약
+from krwordrank.word import KRWordRank
+from krwordrank.sentence import make_vocab_score, MaxScoreTokenizer, keysentence
+import re
+
+# 뉴스 링크 크롤링
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
 
 time_list = [] # 각 단계별 처리 시간 저장
 process = ['load_data' ,' preprocess - get proper docs A','preprocess - get proper doc B',
@@ -47,7 +55,6 @@ process = ['load_data' ,' preprocess - get proper docs A','preprocess - get prop
 # 경고 메시지 숨기기
 import warnings
 warnings.filterwarnings("ignore")
-
 
 # 벡터화
 class Vectorizer:
@@ -301,6 +308,70 @@ def search_by_keyword(key=None, data=None):
 def datetime_to_string(dt_series):
     return [dt.strftime("%Y-%m-%d") for dt in dt_series.tolist()]
 
+def news_summarization(df, col):
+    result_summ = []
+    for i in range(len(df)):
+        ch = re.compile('([.])').split(df[col][i])
+        summary_text = []
+        for s in map(lambda a, b: a + b, ch[::2], ch[1::2]):
+            summary_text.append(s)
+
+        wordrank_extractor = KRWordRank(
+            min_count=5,  # 단어의 최소 출현 빈도수 (그래프 생성 시)
+            max_length=10,  # 단어의 최대 길이
+            verbose=True
+        )
+
+        beta = 0.85  # PageRank의 decaying factor beta
+        max_iter = 10
+        keywords, rank, graph = wordrank_extractor.extract(summary_text, beta, max_iter, num_keywords=100)
+
+        stopwords = {}  # 뉴스 본문 크기가 작은 관계로 생략
+        vocab_score = make_vocab_score(keywords, stopwords, scaling=lambda x: 1)
+        tokenizer = MaxScoreTokenizer(vocab_score)
+
+        penalty = lambda x: 0 if 25 <= len(x) <= 80 else 1
+
+        sents = keysentence(
+            vocab_score, summary_text, tokenizer.tokenize,
+            penalty=penalty,
+            diversity=0.3,
+            topk=3
+        )
+        result_summ.append(sents)
+
+    return result_summ
+
+def link_to_web(title=None):
+    # 드라이버 지정
+    chrome_path = 'chromedriver/chromedriver'
+    options = webdriver.ChromeOptions()  # 크롬 옵션 객체 생성
+    # options.add_argument('headless') # headless 모드 설정 (창 안띄움)
+    options.add_argument("window-size=1920x1080")  # 화면크기(전체화면)
+    options.add_argument("disable-gpu")
+    options.add_argument("disable-infobars")
+    options.add_argument("—disable-extensions")
+    driver = webdriver.Chrome(chrome_path, options=options)
+
+    url = "https://www.google.com/"
+    driver.get(url)
+
+    # title입력
+    driver.find_element_by_class_name("gLFyf.gsfi").send_keys(title)
+
+    # Enter
+    driver.find_element_by_class_name("gLFyf.gsfi").send_keys(Keys.RETURN)
+
+    # 검색 후 첫 기사의 페이지로 이동
+    driver.find_element_by_class_name("LC20lb.DKV0Md").click()
+
+    news_url = driver.current_url
+
+    driver.close()
+
+    # 드라이버의 현재 위치 정보 반환
+    return news_url
+
 def timeline(cat_num, keyword, data_path):
     catergories = ['law', 'education', 'accident', 'welfare', 'traffic', 'environment', 'region', 'health']
     cat_df = pd.read_csv(data_path + 'cat_data/{}.csv'.format(catergories[cat_num]))
@@ -397,15 +468,17 @@ def timeline(cat_num, keyword, data_path):
     df_final = df_final[df_final['viewpoint'] != -1]
     df_final['datetime'] = pd.to_datetime(df_final['date'])
 
-    timeline = df_final.groupby('viewpoint')['datetime', 'title', 'body_prep'].min()
+    # return print(df_final.columns)
+    timeline = df_final.groupby('viewpoint')['datetime', 'title', 'body_prep', 'body_for_summ'].min()
     timeline.sort_values('datetime', ascending=True, inplace=True)
+    timeline['body_summ'] = news_summarization(timeline, 'body_for_summ')
     timeline['datetime'] = datetime_to_string(timeline['datetime'])
 
-    date_body_timeline = timeline[['datetime', 'body_prep']].values.tolist()
-    date_title_body_timeline = timeline[['datetime', 'title', 'body_prep']].values.tolist()
+    date_body_timeline = timeline[['datetime', 'body_summ']].values.tolist()
+    date_title_body_timeline = timeline[['datetime', 'title', 'body_summ']].values.tolist()
 
     dt_article_list = np.array(date_body_timeline).flatten().tolist()
     dt_title_article_list = np.array(date_title_body_timeline).flatten().tolist()
 
-    return dt_article_list
-    # return dt_title_article_list
+    # return dt_article_list
+    return dt_title_article_list
