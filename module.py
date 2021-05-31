@@ -2,12 +2,10 @@
 import numpy as np
 import pandas as pd
 import matplotlib
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import pickle
 import datetime
 import re
-from gensim.summarization import bm25
-from gensim.models import Word2Vec
 from sklearn.preprocessing import StandardScaler
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.manifold import TSNE
@@ -47,7 +45,6 @@ import re
 # 뉴스 링크 크롤링
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-
 time_list = [] # 각 단계별 처리 시간 저장
 process = ['load_data' ,' preprocess - get proper docs A','preprocess - get proper doc B',
            'get category', 'get topic - vectorize', 'get topic-DBSCAN','get main doc']
@@ -55,6 +52,7 @@ process = ['load_data' ,' preprocess - get proper docs A','preprocess - get prop
 # 경고 메시지 숨기기
 import warnings
 warnings.filterwarnings("ignore")
+
 
 # 벡터화
 class Vectorizer:
@@ -311,8 +309,9 @@ def datetime_to_string(dt_series):
 def news_summarization(df, col):
     result_summ = []
     for i in range(len(df)):
-        ch = re.compile('([.])').split(df[col][i])
+        ch = re.compile('([.])').split(df[col].iloc[i])
         summary_text = []
+
         for s in map(lambda a, b: a + b, ch[::2], ch[1::2]):
             summary_text.append(s)
 
@@ -338,46 +337,19 @@ def news_summarization(df, col):
             diversity=0.3,
             topk=3
         )
+
+        sents = " ".join(sents)
         result_summ.append(sents)
 
+    result_summ = np.array(result_summ).flatten().tolist()
     return result_summ
 
-def link_to_web(title=None):
-    # 드라이버 지정
-    chrome_path = 'chromedriver/chromedriver'
-    options = webdriver.ChromeOptions()  # 크롬 옵션 객체 생성
-    # options.add_argument('headless') # headless 모드 설정 (창 안띄움)
-    options.add_argument("window-size=1920x1080")  # 화면크기(전체화면)
-    options.add_argument("disable-gpu")
-    options.add_argument("disable-infobars")
-    options.add_argument("—disable-extensions")
-    driver = webdriver.Chrome(chrome_path, options=options)
-
-    url = "https://www.google.com/"
-    driver.get(url)
-
-    # title입력
-    driver.find_element_by_class_name("gLFyf.gsfi").send_keys(title)
-
-    # Enter
-    driver.find_element_by_class_name("gLFyf.gsfi").send_keys(Keys.RETURN)
-
-    # 검색 후 첫 기사의 페이지로 이동
-    driver.find_element_by_class_name("LC20lb.DKV0Md").click()
-
-    news_url = driver.current_url
-
-    driver.close()
-
-    # 드라이버의 현재 위치 정보 반환
-    return news_url
-
 def timeline(cat_num, keyword, data_path):
-    catergories = ['law', 'education', 'accident', 'welfare', 'traffic', 'environment', 'region', 'health']
-    cat_df = pd.read_csv(data_path + 'cat_data/{}.csv'.format(catergories[cat_num]))
+    catergories = ['law', 'education', 'welfare', 'traffic', 'accident', 'environment', 'region', 'health']
+    cat_df = pd.read_csv(data_path + '/cat_data/{}.csv'.format(catergories[int(cat_num)]))
 
     # load data
-    with open(data_path + 'keyword_data/{}_keywords.pickle'.format(catergories[cat_num]), 'rb') as fr:
+    with open(data_path + '/keyword_data/{}_keywords.pickle'.format(catergories[int(cat_num)]), 'rb') as fr:
         cluster_info = pickle.load(fr)
 
     # 검색어 입력 시 키워드가 포함된 클러스터 번호 리턴
@@ -468,9 +440,10 @@ def timeline(cat_num, keyword, data_path):
     df_final = df_final[df_final['viewpoint'] != -1]
     df_final['datetime'] = pd.to_datetime(df_final['date'])
 
-    # return print(df_final.columns)
     timeline = df_final.groupby('viewpoint')['datetime', 'title', 'body_prep', 'body_for_summ'].min()
     timeline.sort_values('datetime', ascending=True, inplace=True)
+    # timeline['datetime'] = datetime_to_string(timeline['datetime'])
+
     timeline['body_summ'] = news_summarization(timeline, 'body_for_summ')
     timeline['datetime'] = datetime_to_string(timeline['datetime'])
 
@@ -478,7 +451,8 @@ def timeline(cat_num, keyword, data_path):
     date_title_body_timeline = timeline[['datetime', 'title', 'body_summ']].values.tolist()
 
     dt_article_list = np.array(date_body_timeline).flatten().tolist()
-    dt_title_article_list = np.array(date_title_body_timeline).flatten().tolist()
+    # dt_title_article_list = np.array(date_title_body_timeline).flatten().tolist()
 
-    # return dt_article_list
-    return dt_title_article_list
+
+    return dt_article_list
+    # return dt_title_article_list

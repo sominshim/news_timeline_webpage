@@ -193,31 +193,23 @@
 
     <div class='search'>
         <ul>
-            <form action="#" method="POST">
-                <li><button type="button" value=0 class="buttons" name="cat_num">검찰·법원</li>
-                <li><button type="button" value=1 class="buttons" name="cat_num">교육</li>
-                <li><button type="button" value=2 class="buttons" name="cat_num">복지</li>
-                <li><button type="button" value=3 class="buttons" name="cat_num">교통</li>
-                <li><button type="button" value=4 class="buttons" name="cat_num">사건사고</li>
-                <li><button type="button" value=5 class="buttons" name="cat_num">환경</li>
-                <li><button type="button" value=6 class="buttons" name="cat_num">지역</li>
-                <li><button type="button" value=7 class="buttons" name="cat_num">건강</li>
+            <form action="/main" method="POST">
+                <li><input type="radio" value=0 class="buttons" name="cat_num">검찰·법원</li>
+                <li><input type="radio" value=1 class="buttons" name="cat_num">교육</li>
+                <li><input type="radio" value=2 class="buttons" name="cat_num">복지</li>
+                <li><input type="radio" value=3 class="buttons" name="cat_num">교통</li>
+                <li><input type="radio" value=4 class="buttons" name="cat_num">사건사고</li>
+                <li><input type="radio" value=5 class="buttons" name="cat_num">환경</li>
+                <li><input type="radio" value=6 class="buttons" name="cat_num">지역</li>
+                <li><input type="radio" value=7 class="buttons" name="cat_num">건강</li>
                 <input type="text" name="keyword" class="search-query form-control" placeholder="Search here" />
                 <input type="submit" value="search" />
+
             </form>
         </ul>
     </div>
 
-<!--    <div class='search'>-->
-<!--        &lt;!&ndash; <img class='profile' src='http://2.bp.blogspot.com/-Jj05RqgSw2M/VnSBmDGFRVI/AAAAAAAAAzY/D1aiNzXOyyw/s1600/google_logo.gif' width = '50'/> &ndash;&gt;-->
-<!--        <form action="#" method="POST">-->
-<!--            <input type="text" name="keyword" class="search-query form-control" placeholder="Search here" />-->
-<!--            <input type="submit" value="search" />-->
-<!--        </form>-->
-<!--    </div>-->
-
     <script type="text/javascript">
-        // 두번째 방법(괜찮고 많이 쓰기는 하지만 역시나 단점이 존재)
         var menuLinks = document.querySelectorAll('.buttons');
 
         function clickMenuHandler(){
