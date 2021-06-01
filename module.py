@@ -451,8 +451,8 @@ def timeline(cat_num, keyword, data_path):
     date_title_body_timeline = timeline[['datetime', 'title', 'body_summ']].values.tolist()
 
     dt_article_list = np.array(date_body_timeline).flatten().tolist()
-    # dt_title_article_list = np.array(date_title_body_timeline).flatten().tolist()
+    dt_title_article_list = np.array(date_title_body_timeline).flatten().tolist()
 
 
-    return dt_article_list
-    # return dt_title_article_list
+    # return dt_article_list
+    return dt_title_article_list
