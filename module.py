@@ -325,6 +325,19 @@ def news_summarization(df, col):
         max_iter = 10
         keywords, rank, graph = wordrank_extractor.extract(summary_text, beta, max_iter, num_keywords=100)
 
+        if len(keywords) == 0:
+            wordrank_extractor = KRWordRank(
+                min_count=4,  # 단어의 최소 출현 빈도수 (그래프 생성 시)
+                max_length=10,  # 단어의 최대 길이
+                verbose=True
+            )
+
+            beta = 0.85  # PageRank의 decaying factor beta
+            max_iter = 10
+            keywords, rank, graph = wordrank_extractor.extract(summary_text, beta, max_iter, num_keywords=100)
+
+        if len(keywords) == 0:
+            continue
         stopwords = {}  # 뉴스 본문 크기가 작은 관계로 생략
         vocab_score = make_vocab_score(keywords, stopwords, scaling=lambda x: 1)
         tokenizer = MaxScoreTokenizer(vocab_score)
@@ -337,7 +350,6 @@ def news_summarization(df, col):
             diversity=0.3,
             topk=3
         )
-
         sents = " ".join(sents)
         result_summ.append(sents)
 
@@ -440,19 +452,28 @@ def timeline(cat_num, keyword, data_path):
     df_final = df_final[df_final['viewpoint'] != -1]
     df_final['datetime'] = pd.to_datetime(df_final['date'])
 
-    timeline = df_final.groupby('viewpoint')['datetime', 'title', 'body_prep', 'body_for_summ'].min()
+    df_final = df_final.sort_values(by='datetime')
+    df_final = df_final.drop_duplicates(['viewpoint'], keep='first')
+
+    timeline = df_final[['datetime', 'title', 'body_prep', 'tokenized_body', 'body_for_summ']]
     timeline.sort_values('datetime', ascending=True, inplace=True)
     # timeline['datetime'] = datetime_to_string(timeline['datetime'])
 
+    # print(timeline)
     timeline['body_summ'] = news_summarization(timeline, 'body_for_summ')
     timeline['datetime'] = datetime_to_string(timeline['datetime'])
 
     date_body_timeline = timeline[['datetime', 'body_summ']].values.tolist()
     date_title_body_timeline = timeline[['datetime', 'title', 'body_summ']].values.tolist()
 
-    dt_article_list = np.array(date_body_timeline).flatten().tolist()
+    # dt_article_list = np.array(date_body_timeline).flatten().tolist()
     dt_title_article_list = np.array(date_title_body_timeline).flatten().tolist()
 
 
     # return dt_article_list
     return dt_title_article_list
+
+if __name__ == "__main__":
+    cat_num=3
+    keyword='박원순'
+    print(timeline(cat_num, keyword))
