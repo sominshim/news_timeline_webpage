@@ -14,22 +14,22 @@ html {
  */
 body {
   margin: 0;
-  background: linear-gradient(#3498db 50%, #ffffff 50%);
 }
 
 h1.heading{
-    font-size:85px;
-    font-family: 'Caladea', serif;
-    font-weight: 400;
+    font-size:90px;
+    font-family: 'Limelight', cursive;
+    font-family: 'Nanum Myeongjo', serif;
+    font-weight: 300;
     text-align:center;
     margin-top:0px;
-    padding-bottom:10px;
-    color:#0f5280;
-	text-shadow:0px 3px 3px rgba(0,0,0,0.2);
+    padding-bottom:0px;
+    color:#ffec9e;
+	text-shadow:5px 5px 5px rgba(0,0,0,0.3);
 
 }
 span.ingredient {
-    color: #0f79b1;
+    color: #ffec9e;
 }
 /**
  * Add the correct display in IE 9-.
@@ -826,7 +826,7 @@ legend {
 }
 
 .s003 {
-  min-height: 71vh;
+  min-height: 100vh;
   display: -ms-flexbox;
   display: flex;
   -ms-flex-pack: center;
@@ -834,14 +834,11 @@ legend {
   -ms-flex-align: center;
       align-items: center;
   font-family: 'Poppins', sans-serif;
-  background-color: #fff;
-  background: linear-gradient(#ebeef5 65%, #ffffff 50%);
   background-size: cover;
-  background-position: center center;
-  padding: 15px;
+  background-position: center;
 }
 .s003 form {
-  width: 100%;
+  width: 90%;
   max-width: 790px;
   margin-bottom: 0;
 }
@@ -985,7 +982,7 @@ legend {
   color: #fff;
   border: 0;
   cursor: pointer;
-  background: #6A7E95;
+  background: #4D535B;
   transition: all .2s ease-out, color .2s ease-out;
 }
 
@@ -994,7 +991,7 @@ legend {
 }
 
 .s003 form .inner-form .input-field.third-wrap .btn-search:hover {
-  background: #4D535B;
+  background: #000000;
 }
 
 .s003 form .inner-form .input-field.third-wrap .btn-search:focus {

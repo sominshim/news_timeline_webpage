@@ -7,10 +7,10 @@
     <link href="https://fonts.googleapis.com/css?family=Poppins" rel="stylesheet" />
     <link href="{{ url_for('static', filename='css/main.css') }}" rel="stylesheet"/>
     <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Caladea:wght@700&family=Vast+Shadow&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Limelight&family=Nanum+Myeongjo:wght@800&display=swap" rel="stylesheet">
   </head>
   <body>
-    <div class="s003">
+    <div style="background:url({{ url_for('static', filename='images/main.png')}});background-size:100%;"class="s003">
       <form action="/main" method="POST">
        <a onClick="window.location.reload()"><h1 class="heading">News <span class="ingredient">Times</span></h1></a>
         <div class="inner-form">
