@@ -1,106 +1,79 @@
-<style>
-    @font-face {
-      font-family: 'Poiret One';
-      font-style: normal;
-      font-weight: 400;
-      src: local('Poiret One'), local('PoiretOne-Regular'), url(http://themes.googleusercontent.com/static/fonts/poiretone/v1/HrI4ZJpJ3Fh0wa5ofYMK8RsxEYwM7FgeyaSgU71cLG0.woff) format('woff');
-    }
-
-    @font-face {
-      font-family: 'Open Sans Light';
-      font-style: normal;
-      font-weight: 300;
-      src: local('Open Sans Light'), local('OpenSans-Light'), url(http://themes.googleusercontent.com/static/fonts/opensans/v6/DXI1ORHCpsQm3Vp6mXoaTXhCUOGz7vYGh680lGh-uXM.woff) format('woff');
-    }
-    @font-face {
-      font-family: 'Open Sans';
-      font-style: normal;
-      font-weight: 400;
-      src: local('Open Sans'), local('OpenSans'), url(http://themes.googleusercontent.com/static/fonts/opensans/v6/cJZKeOuBrn4kERxqtaUH3T8E0i7KZn-EPnyo3HZu7kw.woff) format('woff');
-    }
-
-    h1.logo{
-      font-size:80px;
-      font-family:'Poiret One', sans;
-      font-weight: 700;
-      text-align:center;
-      margin-top:100px;
-      color:#13c11aff;
-      text-shadow:0px 1px 2px rgba(0,0,0,0.3);
-    }
-
-    html{
-      width:100%;
-      /*height:300%;*/
-    }
-
-    body{
-        font-family:'Open Sans', sans;
-        background:#f1f1f1;
-        padding: 5px;
-    }
-
-    p{
-        font-size:15px;
-        font-family: 'Open Sans Light', sans;
-
-    }
-
-    form{
-        text-align: center;
-        margin-left: auto;
-        margin-right: auto;
-
-        width:80%;
-        height:200%;
-
-        font-size:20px;
-    }
-
-</style>
-
 <html>
     <head>
-        <title> timeline </title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="author" content="colorlib.com">
+        <link href="https://fonts.googleapis.com/css?family=Poppins" rel="stylesheet" />
+        <link href="{{ url_for('static', filename='css/timeline.css') }}" rel="stylesheet"/>
+        <link rel="preconnect" href="https://fonts.gstatic.com">
+        <link href="https://fonts.googleapis.com/css2?family=Limelight&family=Nanum+Myeongjo:wght@800&display=swap" rel="stylesheet">
     </head>
 
     <body>
     <br><br>
-            <a>
-              <h1 class='logo'>TAMLA</h1>
-            </a>
+    <div style="background:url({{ url_for('static', filename='images/main.png')}});background-size:100%;"class="s003">
+            <a onClick="window.open('http://127.0.0.1:5000')"><h1 class="heading">News <span class="ingredient">Times</span></h1></a>
 
+    </div>
              <!-- back에서 가져오기 data로 받음 -->
             <form method="POST", action="{{url_for('show_timeline')}}">
 
-                <hr align="center" style="color:#13c11aff ; border: solid 4px #13c11aff; width: 80%;">
-<!--            <p>{{data}}</p>-->
-                <center>
+<!--                <p>{{data}}</p>-->
+               <center>
                 <!-- timeline for문 -->
+
+
+
                 <script type="text/javascript">
                     var k=0;
                     var data = {{data|safe}};
+                    var data_url = {{data_url|safe}};
 
                     for(a=0; a<data.length/3; a++){
+                        //id 선언
+                        document.write('<div class="container">')
+                        document.write('<div class="timeline-item">')
 
-                        document.write('<br>')
-                        // 날짜
-                        document.write('<p>' + data[k]+ '</p>');
-                        k=k+1
-                        // title
-                        document.write('<p>' + data[k] + '</p>');
-                        k=k+1;
-                        // body_summarized
-                        document.write('<p>' + data[k] + '</p>');
-                        k=k+1;
-                        document.write('<br>');
-                        document.write('<hr align="center" style="color:#13c11aff; border: solid 4px #13c11aff; width: 70%;">');
+                        //date
+                        document.write('<div class="time">')
+                        document.write('<span id ="date"+[k]>' + data[k] + '</span>')
+                        document.write('</div>')
+                        k = k + 1
+
+                        //title
+                        document.write('<a id="tit_text"+[k];  href = "' + data_url[a] + '"; target = "_blank";>' + data[k] + '</a>')
+                        k = k + 1
+
+                        //summarize
+                        document.write('<p id="summ_text"+[k]; align="center"; width: 50%;>' + data[k])
+                        k = k + 1
+
+                        document.write('</p>')
+                        document.write('</div>')
+                        document.write('</div>')
+
+
+                        //time line
+                        //document.write('<br>');
+                        //document.getElementById("date"+[tmp1]).innerHTML=data[tmp1]
+
+                        //document.getElementById("tit_text"+[tmp2]).innerHTML=data[tmp2]
+
+                        //document.getElementById("summ_text"+[tmp3]).innerHTML=data[tmp3]
+
+
+                        //document.write('<br>');
+                        //document.write('<hr align="center" style="color:#13c11aff; border: solid 4px #13c11aff; width: 70%;">');
 
                     }
                 </script>
-                </center>
 
+                </center>
             </form>
+
+
+
 
     </body>
 </html>

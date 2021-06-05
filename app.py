@@ -1,6 +1,6 @@
 import json
 from module import *
-from flask import Flask, request, render_template, redirect, url_for
+from flask import Flask, request, render_template
 
 app = Flask(__name__)
 
@@ -18,10 +18,14 @@ def main(cat_num=None, keyword=None):
 @app.route("/show_timeline", methods=["POST", "GET"])
 def show_timeline(cat_num=None, keyword=None):
     data_path = "data"
-    timeline_list = timeline(cat_num, keyword, data_path)
+    timeline_list, url = timeline(cat_num, keyword, data_path)
     #return f"<h1>{timeline_list}</h1>"
+
+    if timeline_list == 0:
+        return render_template('main.html', data=timeline_list)
+
     if request.method == "POST":
-        return render_template('timeline.html', data=json.dumps(timeline_list))
+        return render_template('timeline.html', data_url = json.dumps(url), data=json.dumps(timeline_list))
     else:
         return f"<h1>{timeline_list}</h1>"
 

@@ -1,4 +1,3 @@
-
 import numpy as np
 import pandas as pd
 import matplotlib
@@ -337,7 +336,9 @@ def news_summarization(df, col):
             keywords, rank, graph = wordrank_extractor.extract(summary_text, beta, max_iter, num_keywords=100)
 
         if len(keywords) == 0:
+            result_summ.append(np.nan)
             continue
+
         stopwords = {}  # 뉴스 본문 크기가 작은 관계로 생략
         vocab_score = make_vocab_score(keywords, stopwords, scaling=lambda x: 1)
         tokenizer = MaxScoreTokenizer(vocab_score)
@@ -357,6 +358,7 @@ def news_summarization(df, col):
     return result_summ
 
 def timeline(cat_num, keyword, data_path):
+
     catergories = ['law', 'education', 'welfare', 'traffic', 'accident', 'environment', 'region', 'health']
     cat_df = pd.read_csv(data_path + '/cat_data/{}.csv'.format(catergories[int(cat_num)]))
 
@@ -369,7 +371,8 @@ def timeline(cat_num, keyword, data_path):
     keyword_df = cat_df[cat_df['labels'].isin(match_cluster)]
 
     if keyword_df.empty:
-        return print("키워드에 해당하는 타임라인이 없습니다.")
+        return 0, 0
+
 
     final_nouns_list = noun_extractor(cat_df)
 
@@ -455,7 +458,7 @@ def timeline(cat_num, keyword, data_path):
     df_final = df_final.sort_values(by='datetime')
     df_final = df_final.drop_duplicates(['viewpoint'], keep='first')
 
-    timeline = df_final[['datetime', 'title', 'body_prep', 'tokenized_body', 'body_for_summ']]
+    timeline = df_final[['datetime', 'title', 'body_prep', 'tokenized_body', 'body_for_summ', 'url']]
     timeline.sort_values('datetime', ascending=True, inplace=True)
     # timeline['datetime'] = datetime_to_string(timeline['datetime'])
 
@@ -463,17 +466,19 @@ def timeline(cat_num, keyword, data_path):
     timeline['body_summ'] = news_summarization(timeline, 'body_for_summ')
     timeline['datetime'] = datetime_to_string(timeline['datetime'])
 
+    timeline.drop(timeline.loc[timeline['body_summ']=='nan'].index, axis=0, inplace=True)
+
     date_body_timeline = timeline[['datetime', 'body_summ']].values.tolist()
     date_title_body_timeline = timeline[['datetime', 'title', 'body_summ']].values.tolist()
 
     # dt_article_list = np.array(date_body_timeline).flatten().tolist()
     dt_title_article_list = np.array(date_title_body_timeline).flatten().tolist()
-
+    url = timeline[['url']].values.tolist()
 
     # return dt_article_list
-    return dt_title_article_list
-
-if __name__ == "__main__":
-    cat_num=3
-    keyword='박원순'
-    print(timeline(cat_num, keyword))
+    return dt_title_article_list, url
+#
+# if __name__ == "__main__":
+#     cat_num=3
+#     keyword='박원순'
+#     print(timeline(cat_num, keyword))
