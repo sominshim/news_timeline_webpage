@@ -1,11 +1,10 @@
 import numpy as np
 import pandas as pd
 import matplotlib
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import pickle
 import datetime
 import re
-from gensim.models import Word2Vec
 from sklearn.preprocessing import StandardScaler
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.manifold import TSNE
@@ -37,7 +36,6 @@ import time # 연산 시간 측정
 
 from collections import Counter
 from soynlp.noun import NewsNounExtractor
-
 # 문서 요약
 from krwordrank.word import KRWordRank
 from krwordrank.sentence import make_vocab_score, MaxScoreTokenizer, keysentence
@@ -46,7 +44,6 @@ import re
 # 뉴스 링크 크롤링
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-
 time_list = [] # 각 단계별 처리 시간 저장
 process = ['load_data' ,' preprocess - get proper docs A','preprocess - get proper doc B',
            'get category', 'get topic - vectorize', 'get topic-DBSCAN','get main doc']
@@ -54,6 +51,7 @@ process = ['load_data' ,' preprocess - get proper docs A','preprocess - get prop
 # 경고 메시지 숨기기
 import warnings
 warnings.filterwarnings("ignore")
+
 
 # 벡터화
 class Vectorizer:
@@ -326,6 +324,21 @@ def news_summarization(df, col):
         max_iter = 10
         keywords, rank, graph = wordrank_extractor.extract(summary_text, beta, max_iter, num_keywords=100)
 
+        if len(keywords) == 0:
+            wordrank_extractor = KRWordRank(
+                min_count=4,  # 단어의 최소 출현 빈도수 (그래프 생성 시)
+                max_length=10,  # 단어의 최대 길이
+                verbose=True
+            )
+
+            beta = 0.85  # PageRank의 decaying factor beta
+            max_iter = 10
+            keywords, rank, graph = wordrank_extractor.extract(summary_text, beta, max_iter, num_keywords=100)
+
+        if len(keywords) == 0:
+            result_summ.append(np.nan)
+            continue
+
         stopwords = {}  # 뉴스 본문 크기가 작은 관계로 생략
         vocab_score = make_vocab_score(keywords, stopwords, scaling=lambda x: 1)
         tokenizer = MaxScoreTokenizer(vocab_score)
@@ -338,7 +351,6 @@ def news_summarization(df, col):
             diversity=0.3,
             topk=3
         )
-
         sents = " ".join(sents)
         result_summ.append(sents)
 
@@ -346,11 +358,12 @@ def news_summarization(df, col):
     return result_summ
 
 def timeline(cat_num, keyword, data_path):
-    catergories = ['law', 'education', 'accident', 'welfare', 'traffic', 'environment', 'region', 'health']
-    cat_df = pd.read_csv(data_path + 'cat_data/{}.csv'.format(catergories[cat_num]))
+
+    catergories = ['law', 'education', 'welfare', 'traffic', 'accident', 'environment', 'region', 'health']
+    cat_df = pd.read_csv(data_path + '/cat_data/{}.csv'.format(catergories[int(cat_num)]))
 
     # load data
-    with open(data_path + 'keyword_data/{}_keywords.pickle'.format(catergories[cat_num]), 'rb') as fr:
+    with open(data_path + '/keyword_data/{}_keywords.pickle'.format(catergories[int(cat_num)]), 'rb') as fr:
         cluster_info = pickle.load(fr)
 
     # 검색어 입력 시 키워드가 포함된 클러스터 번호 리턴
@@ -358,7 +371,8 @@ def timeline(cat_num, keyword, data_path):
     keyword_df = cat_df[cat_df['labels'].isin(match_cluster)]
 
     if keyword_df.empty:
-        return print("키워드에 해당하는 타임라인이 없습니다.")
+        return 0, 0
+
 
     final_nouns_list = noun_extractor(cat_df)
 
@@ -441,21 +455,30 @@ def timeline(cat_num, keyword, data_path):
     df_final = df_final[df_final['viewpoint'] != -1]
     df_final['datetime'] = pd.to_datetime(df_final['date'])
 
-    # return print(df_final.columns)
-    timeline = df_final.groupby('viewpoint')['datetime', 'title', 'body_prep', 'body_for_summ'].min()
+    df_final = df_final.sort_values(by='datetime')
+    df_final = df_final.drop_duplicates(['viewpoint'], keep='first')
+
+    timeline = df_final[['datetime', 'title', 'body_prep', 'tokenized_body', 'body_for_summ', 'url']]
     timeline.sort_values('datetime', ascending=True, inplace=True)
+    # timeline['datetime'] = datetime_to_string(timeline['datetime'])
 
-    return print(link_to_web(timeline))
-    #return print(news_summarization(timeline, 'body_for_summ'))
-
+    # print(timeline)
     timeline['body_summ'] = news_summarization(timeline, 'body_for_summ')
     timeline['datetime'] = datetime_to_string(timeline['datetime'])
+
+    timeline.drop(timeline.loc[timeline['body_summ']=='nan'].index, axis=0, inplace=True)
 
     date_body_timeline = timeline[['datetime', 'body_summ']].values.tolist()
     date_title_body_timeline = timeline[['datetime', 'title', 'body_summ']].values.tolist()
 
-    dt_article_list = np.array(date_body_timeline).flatten().tolist()
+    # dt_article_list = np.array(date_body_timeline).flatten().tolist()
     dt_title_article_list = np.array(date_title_body_timeline).flatten().tolist()
+    url = timeline[['url']].values.tolist()
 
     # return dt_article_list
-    return dt_title_article_list
+    return dt_title_article_list, url
+#
+# if __name__ == "__main__":
+#     cat_num=3
+#     keyword='박원순'
+#     print(timeline(cat_num, keyword))
